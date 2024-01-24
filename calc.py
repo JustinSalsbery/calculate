@@ -6,11 +6,57 @@ from enum import Enum
 
 
 def main():
-    argv.pop(0)  # remove file name
-    text = "".join(argv)
-
-    tokens = parse(text)
+    text = setup()
+    tokens = lex(text)
+    parse(tokens)
     print(tokens)
+
+
+# *****************************************************************************
+# HELP MESSAGE ****************************************************************
+# *****************************************************************************
+
+
+def setup() -> str:
+    argv.pop(0)  # remove file name
+    if len(argv) == 0:
+        print('calc --help')
+        print()
+        print('examples:')
+        print('\tcalc "3 * 9"')
+        print('\tcalc "0x12 ** 2 << 1 == (1 + 9)"')
+
+        exit(1)
+
+    text = "".join(argv)
+    if "help" in text:
+        print("terminal calculator")
+        print()
+        print("format:")
+        print("\tdecimal    : none, ex. 123456")
+        print("\tbinary     : 0b  , ex. 0b0101")
+        print("\thexadecimal: 0x  , ex. 0xabcd")
+        print()
+        print("operations:")
+        print("\t+ : add                   - : subtract")
+        print("\t* : multiply              / : divide")
+        print("\t% : modulus               ** : exponentiation")
+        print("\t& : bitwise and           | : bitwise or")
+        print("\t~ : bitwise not           ^ : bitwise xor")
+        print("\t&& : logical and          || : logical or")
+        print("\t< : lesser                > : greater")
+        print("\t== : equal                != : not equal")
+        print("\t>= : greater or equal     <= : lesser or equal")
+        print("\t<< : left shift           >> : right shift")
+
+        exit(1)
+
+    return text
+
+
+# *****************************************************************************
+# TOKEN DEFINITIONS ***********************************************************
+# *****************************************************************************
 
 
 class TokenType(Enum):
@@ -62,7 +108,12 @@ class TokenNum(Token):
         return f"({self.token.name}, {self.paren_level}, {self.value})"
 
 
-def parse(text: str) -> list[Token]:
+# *****************************************************************************
+# LEXICAL ANALYSIS ************************************************************
+# *****************************************************************************
+
+
+def lex(text: str) -> list[Token]:
     tokens = []
 
     i = 0
@@ -77,7 +128,7 @@ def parse(text: str) -> list[Token]:
             base = text[i + 1]
 
             if base == "b":  # base 2
-                num, index = eat_num(text, i + 2, text_len)
+                num, index = lex_num(text, i + 2, text_len)
                 num = int(num, 2)
 
                 token = TokenNum(num, paren_level)
@@ -87,7 +138,7 @@ def parse(text: str) -> list[Token]:
                 continue  # skip to next iteration
 
             elif base == "x":  # base 16
-                num, index = eat_num(text, i + 2, text_len)
+                num, index = lex_num(text, i + 2, text_len)
                 num = int(num, 16)
 
                 token = TokenNum(num, paren_level)
@@ -97,7 +148,7 @@ def parse(text: str) -> list[Token]:
                 continue  # skip to next iteration
 
         if char.isdigit():  # base 10
-            num, index = eat_num(text, i, text_len)
+            num, index = lex_num(text, i, text_len)
             num = int(num)
 
             token = TokenNum(num, paren_level)
@@ -231,7 +282,7 @@ def parse(text: str) -> list[Token]:
     return tokens
 
 
-def eat_num(text: str, index: int, text_len: int):
+def lex_num(text: str, index: int, text_len: int):
     word = ""
 
     while index < text_len and text[index].isalnum():
@@ -239,6 +290,23 @@ def eat_num(text: str, index: int, text_len: int):
         index += 1
 
     return (word, index - 1)
+
+
+# *****************************************************************************
+# GRAMMAR PARSING *************************************************************
+# *****************************************************************************
+
+
+def parse(tokens: list[Token]):
+    index = eat_num(tokens, 0)
+
+
+def eat_num(tokens: list[Token], index: int) -> int:
+    return index
+
+
+def eat_op(tokens: list[Token], index: int) -> int:
+    return index
 
 
 if __name__ == "__main__":
