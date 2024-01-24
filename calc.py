@@ -64,10 +64,12 @@ class TokenNum(Token):
 
 def parse(text: str) -> list[Token]:
     tokens = []
+
+    i = 0
     paren_level = 0
     text_len = len(text)
 
-    for i in range(text_len):
+    while i < text_len:
         char = text[i]
 
         # numbers can be: 0b01... ; 0xab... ; 123...
@@ -102,6 +104,15 @@ def parse(text: str) -> list[Token]:
             tokens.append(token)
 
             i = index
+
+        elif char == " ":
+            pass
+
+        elif char == "\n":
+            pass
+
+        elif char == "\t":
+            pass
 
         elif char == "+":  # +
             token = Token(TokenType.ADD, paren_level)
@@ -142,7 +153,13 @@ def parse(text: str) -> list[Token]:
             tokens.append(token)
 
         elif char == "*":  # * ; **
-            pass
+            if text[i + 1] == "*":
+                token = Token(TokenType.EXP, paren_level)
+                i += 1
+            else:
+                token = Token(TokenType.MUL, paren_level)
+
+            tokens.append(token)
 
         elif char == "/":  # /
             token = Token(TokenType.DIV, paren_level)
@@ -208,6 +225,8 @@ def parse(text: str) -> list[Token]:
         else:
             print(f"TokenError: {char} is not defined")
             exit(1)
+
+        i += 1
 
     return tokens
 
