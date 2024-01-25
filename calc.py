@@ -18,6 +18,10 @@ def main():
 
 
 def setup() -> str:
+    """
+    handle help and return arguments as a string
+    """
+
     argv.pop(0)  # remove file name
     if len(argv) == 0:
         print('calc --help')
@@ -103,9 +107,10 @@ class TokenNum(Token):
     def __init__(self, value: int, paren_level: int):
         super().__init__(TokenType.NUM, paren_level)
         self.value = value
+        self.b_not = False
 
     def __repr__(self):
-        return f"({self.token.name}, {self.paren_level}, {self.value})"
+        return f"({self.token.name}, {self.paren_level}, {self.b_not}, {self.value})"
 
 
 # *****************************************************************************
@@ -114,6 +119,10 @@ class TokenNum(Token):
 
 
 def lex(text: str) -> list[Token]:
+    """
+    convert string to list of tokens
+    """
+
     tokens = []
 
     i = 0
@@ -279,10 +288,15 @@ def lex(text: str) -> list[Token]:
 
         i += 1
 
+    assert (not paren_level)
     return tokens
 
 
 def lex_num(text: str, index: int, text_len: int):
+    """
+    scan entire number
+    """
+
     word = ""
 
     while index < text_len and text[index].isalnum():
@@ -298,15 +312,65 @@ def lex_num(text: str, index: int, text_len: int):
 
 
 def parse(tokens: list[Token]):
+    """
+    verify the grammar is legal
+    """
+
     index = eat_num(tokens, 0)
+    tokens_len = len(tokens)
+
+    while index < tokens_len:
+        index = eat_op(tokens, index)
+        assert (index < tokens_len)
+
+        index = eat_num(tokens, index)
+        tokens_len = len(tokens)
 
 
-def eat_num(tokens: list[Token], index: int) -> int:
-    return index
+def eat_num(tokens: list[Token], index: int):
+    """
+    removes binary not operators from tokens ; must reevaluate tokens length
+    """
+
+    token = tokens[index]
+    b_not = False
+
+    while token.token.name == TokenType.B_NOT.name:
+        b_not = not b_not
+
+        tokens.pop(index)
+        token = tokens[index]
+
+    if isinstance(token, TokenNum):
+        token.b_not = b_not
+    else:
+        print(f"Error: expected number at token {index}")
+        exit(1)
+
+    return index + 1
 
 
-def eat_op(tokens: list[Token], index: int) -> int:
-    return index
+def eat_op(tokens: list[Token], index: int):
+    token = tokens[index]
+    if token.token.name == TokenType.NUM.name \
+            or token.token.name == TokenType.B_NOT.name:
+        print(f"Error: expected operator at token {index}")
+        exit(1)
+
+    return index + 1
+
+
+# *****************************************************************************
+# RUNTIME *********************************************************************
+# *****************************************************************************
+
+
+def order(tokens: list[Token]):
+    pass
+
+
+def run(tokens: list[Token]):
+    pass
 
 
 if __name__ == "__main__":
