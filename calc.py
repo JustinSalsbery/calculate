@@ -399,7 +399,10 @@ def order(tokens: list[Token]) -> list[list[int]]:
 
 def run(tokens: list[Token], pemdas: list[list[int]]):
     pemdas_len = len(pemdas)
-    res = 0
+
+    initial = tokens[0]
+    assert (isinstance(initial, TokenNum))
+    res = initial.value  # set res if no ops
 
     while pemdas_len:
         index = pemdas[0][1]
