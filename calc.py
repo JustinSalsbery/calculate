@@ -143,7 +143,7 @@ def lex(text: str) -> list[Token]:
                 token = TokenNum(num, paren_level)
                 tokens.append(token)
 
-                i = index
+                i = index + 1
                 continue  # skip to next iteration
 
             elif base == "x":  # base 16
@@ -153,7 +153,7 @@ def lex(text: str) -> list[Token]:
                 token = TokenNum(num, paren_level)
                 tokens.append(token)
 
-                i = index
+                i = index + 1
                 continue  # skip to next iteration
 
         if char.isdigit():  # base 10
