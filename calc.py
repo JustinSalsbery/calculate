@@ -341,7 +341,7 @@ def eat_num(tokens: list[Token], index: int) -> int:
         token = tokens[index]
 
     if not isinstance(token, TokenNum):
-        print(f"Error: expected number at token {index}")
+        print(f"ParsingError: expected number at token {index}")
         exit(1)
 
     token.b_not = b_not
@@ -352,7 +352,7 @@ def eat_op(tokens: list[Token], index: int) -> int:
     token = tokens[index]
     if token.token.name == TokenType.NUM.name \
             or token.token.name == TokenType.B_NOT.name:
-        print(f"Error: expected operator at token {index}")
+        print(f"ParsingError: expected operator at token {index}")
         exit(1)
 
     return index + 1
